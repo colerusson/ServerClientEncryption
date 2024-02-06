@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 
 internal sealed class EncryptedEchoServer : EchoServerBase
 {
-
     /// <summary>
     /// Logger to use in this class.
     /// </summary>
