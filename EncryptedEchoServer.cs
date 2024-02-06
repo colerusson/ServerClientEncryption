@@ -21,7 +21,6 @@ internal sealed class EncryptedEchoServer : EchoServerBase
     {
         // todo: Step 1: Send the public key to the client in PKCS#1 format.
         // Encode using Base64: Convert.ToBase64String
-
         return Convert.ToBase64String(rsa.ExportRSAPublicKey());
     }
 
@@ -52,9 +51,10 @@ internal sealed class EncryptedEchoServer : EchoServerBase
 
         // todo: Step 3: Verify the HMAC.
         // Throw an InvalidSignatureException if the received hmac is bad.
-        using (HMACSHA256 hmac = new HMACSHA256())
+        // Verify the HMAC
+        byte[] decryptedHmacKey = rsa.Decrypt(encryptedMessage.HMACKeyWrap, RSAEncryptionPadding.OaepSHA256);
+        using (HMACSHA256 hmac = new HMACSHA256(decryptedHmacKey))
         {
-            byte[] hmacKey = rsa.Decrypt(encryptedMessage.HMACKeyWrap, RSAEncryptionPadding.OaepSHA256);
             byte[] computedHmac = hmac.ComputeHash(decryptedData);
 
             // Compare the computed HMAC with the received HMAC
@@ -79,9 +79,6 @@ internal sealed class EncryptedEchoServer : EchoServerBase
 
         // todo: Step 2: Put the data in an SignedMessage object and serialize to JSON.
         // Return that JSON.
-        // var message = new SignedMessage(...);
-        // return JsonSerializer.Serialize(message);
-
         var message = new SignedMessage(data, signature);
         return JsonSerializer.Serialize(message);
     }
